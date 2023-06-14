@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    dd('APP  is Deployed');
 });
 
 Route::get('/test-api-call',[\App\Http\Controllers\HubApiController::class,'processApi']);
