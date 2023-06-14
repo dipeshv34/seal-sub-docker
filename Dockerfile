@@ -2,6 +2,8 @@ FROM php:8.1-fpm-alpine
 
 RUN apk add --no-cache nginx wget
 
+RUN apk update && apk add --no-cache supervisor
+
 RUN mkdir -p /run/nginx
 
 COPY docker/nginx.conf /etc/nginx/nginx.conf
@@ -17,3 +19,11 @@ RUN cd /app && \
 RUN chown -R www-data: /app
 
 CMD sh /app/docker/startup.sh
+
+# copy supervisor configuration
+COPY docker/supervisord.conf /etc/supervisord.conf
+
+EXPOSE 80
+
+# run supervisor
+CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisord.conf"]
