@@ -4,12 +4,7 @@ RUN apk add --no-cache nginx wget
 
 RUN apk update && apk add --no-cache supervisor
 
-RUN docker-php-ext-install \
-    gd \
-    pcntl \
-    bcmath \
-    mysqli \
-    pdo_mysql
+RUN docker-php-ext-install pcntl
 
 RUN mkdir -p /run/nginx
 
