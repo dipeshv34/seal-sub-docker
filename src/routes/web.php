@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    dd('APP  is Deployed');
+\App\Jobs\ProcessPodcast::dispatch();
 });
 
 Route::get('/test-api-call',[\App\Http\Controllers\HubApiController::class,'processApi']);

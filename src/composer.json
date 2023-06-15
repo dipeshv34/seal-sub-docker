@@ -38,7 +38,8 @@
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi",
             "@php artisan horizon:install --ansi",
-            "@php artisan optimize:clear --ansi"
+            "@php artisan optimize:clear --ansi",
+            "@php artisan queue:restart --ansi"
         ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
