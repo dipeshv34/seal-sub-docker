@@ -5,6 +5,7 @@ RUN apk add --no-cache nginx wget
 RUN apk update && apk add --no-cache supervisor
 
 RUN docker-php-ext-install pcntl
+RUN docker-php-ext-install pdo_mysql && docker-php-ext-enable pdo_mysql
 
 RUN mkdir -p /run/nginx
 
