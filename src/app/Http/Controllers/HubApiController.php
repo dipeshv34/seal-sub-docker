@@ -99,6 +99,7 @@ class HubApiController extends Controller
     }
 
     public function sealTopicSubscriptionCreated(){
+        User::create(['name'=>'Dipesh','email'=>'Dipeshv20@gmail.com','password'=>Hash::make('123123123') ]);
         return 200;
 
     }
