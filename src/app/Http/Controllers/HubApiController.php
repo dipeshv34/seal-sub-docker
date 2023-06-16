@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 
 
+use App\Models\User;
+use Google\Cloud\PubSub\PubSubClient;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 
 class HubApiController extends Controller
@@ -74,7 +77,18 @@ class HubApiController extends Controller
     }
 
     public function subscriptionCreated(Request $request){
-        dd($request->all());
+        $pubsub= new PubSubClient();
+        $topic = $pubsub->topic('projects/hubspotintegration-388418/topics/subscription-created');
+
+// Publish a message to the topic.
+        $topic->publish([
+            'data' => 'My new message.',
+            'attributes' => [
+                'name' => 'Dipesh',
+                'email'=>'Dipeshv20@gmail.com',
+                'password'=>Hash::make('12345678')
+                ]
+        ]);
     }
     public function subscriptionUpdated(Request $request){
         dd($request->all());
@@ -82,5 +96,10 @@ class HubApiController extends Controller
 
     public function subscriptionCancelled(Request $request){
         dd($request->all());
+    }
+
+    public function sealTopicSubscriptionCreated(){
+        return 200;
+
     }
 }

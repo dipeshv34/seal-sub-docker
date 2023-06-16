@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-\App\Jobs\ProcessPodcast::dispatch();
+dd('app deployed');
 });
 
 Route::get('/test-api-call',[\App\Http\Controllers\HubApiController::class,'processApi']);
@@ -22,5 +22,6 @@ Route::get('/register-webhook',[\App\Http\Controllers\HubApiController::class,'r
 Route::any('/subscription-webhook-created',[\App\Http\Controllers\HubApiController::class,'subscriptionCreated']);
 Route::any('/subscription-webhook-updated',[\App\Http\Controllers\HubApiController::class,'subscriptionUpdated']);
 Route::any('/subscription-webhook-cancelled',[\App\Http\Controllers\HubApiController::class,'subscriptionCancelled']);
+Route::any('/seal-topic-subscription-created',[\App\Http\Controllers\HubApiController::class,'sealTopicSubscriptionCreated']);
 
 
