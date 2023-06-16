@@ -9,6 +9,7 @@ use Google\Cloud\PubSub\PubSubClient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class HubApiController extends Controller
 {
@@ -99,8 +100,13 @@ class HubApiController extends Controller
     }
 
     public function sealTopicSubscriptionCreated(){
-        User::create(['name'=>'Dipesh','email'=>'Dipeshv20@gmail.com','password'=>Hash::make('123123123') ]);
-        return 200;
+        try{
+            User::create(['name'=>'Dipesh','email'=>'Dipeshv20@gmail.com','password'=>Hash::make('123123123') ]);
+            return response('OK',200);
+        }catch (\Exception $e){
+            Log::info('message in catch >>>>>>>>>>'.$e->getMessage());
+        }
+
 
     }
 }
