@@ -102,6 +102,7 @@ class HubApiController extends Controller
     public function sealTopicSubscriptionCreated(){
         try{
             User::create(['name'=>'Dipesh','email'=>'Dipeshv20@gmail.com','password'=>Hash::make('123123123') ]);
+            Log::info('message received dipesh');
             return response('OK',200);
         }catch (\Exception $e){
             Log::info('message in catch >>>>>>>>>>'.$e->getMessage());
