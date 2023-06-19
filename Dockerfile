@@ -20,12 +20,6 @@ RUN cd /app && \
     /usr/local/bin/composer install --no-dev
 
 RUN chown -R www-data: /app
-
-# copy supervisor configuration
-COPY docker/supervisord.conf /etc/supervisord.conf
-
 EXPOSE 80
-
 # run supervisor
-CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisord.conf"]
 CMD sh /app/docker/startup.sh
