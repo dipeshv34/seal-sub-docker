@@ -90,7 +90,7 @@ class HubApiController extends Controller
     public function subscriptionUpdated(Request $request){
         try{
             $pubsub= new PubSubClient();
-            $topic = $pubsub->topic('projects/hubspotintegration-388418/topics/subscription-updated');
+            $topic = $pubsub->topic('projects/hubspotintegration-388418/topics/seal-subscription-update');
             $topic->publish(['data'=>json_encode($request->all())]);
             return 200;
         }catch (\Exception $e){
@@ -101,7 +101,7 @@ class HubApiController extends Controller
     public function subscriptionCancelled(Request $request){
         try{
             $pubsub= new PubSubClient();
-            $topic = $pubsub->topic('projects/hubspotintegration-388418/topics/subscription-cancelled');
+            $topic = $pubsub->topic('projects/hubspotintegration-388418/topics/seal-subscription-cancelled');
             $topic->publish(['data'=>json_encode($request->all())]);
             return 200;
         }catch (\Exception $e){
