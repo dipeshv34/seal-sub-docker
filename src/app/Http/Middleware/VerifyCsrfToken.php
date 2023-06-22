@@ -12,6 +12,11 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        '/seal-topic-subscription-created'
+        '/subscription-webhook-created',
+        '/seal-topic-subscription-created',
+        '/subscription-webhook-updated',
+        '/subscription-webhook-cancelled',
+        '/seal-topic-subscription-created',
+        '/seal-topic-subscription-updated'
     ];
 }
