@@ -82,7 +82,7 @@ class HubApiController extends Controller
             $pubsub= new PubSubClient();
             $topic = $pubsub->topic('projects/hubspotintegration-388418/topics/subscription-created');
             $topic->publish(['data'=>json_encode($request->all())]);
-            return 200;
+            return response()->json(['message'=>'ok','status'=>true],200);
         }catch (\Exception $e){
             Log::info('<<<<>>>>>>> calling create topic --- '.$e->getMessage());
         }
@@ -92,7 +92,7 @@ class HubApiController extends Controller
             $pubsub= new PubSubClient();
             $topic = $pubsub->topic('projects/hubspotintegration-388418/topics/seal-subscription-update');
             $topic->publish(['data'=>json_encode($request->all())]);
-            return 200;
+            return response()->json(['message'=>'ok','status'=>true],200);
         }catch (\Exception $e){
             Log::info('<<<<>>>>>>> calling update topic --- '.$e->getMessage());
         }
@@ -103,7 +103,7 @@ class HubApiController extends Controller
             $pubsub= new PubSubClient();
             $topic = $pubsub->topic('projects/hubspotintegration-388418/topics/seal-subscription-cancelled');
             $topic->publish(['data'=>json_encode($request->all())]);
-            return 200;
+            return response()->json(['message'=>'ok','status'=>true],200);
         }catch (\Exception $e){
             Log::info('<<<<>>>>>>> calling cancel topic --- '.$e->getMessage());
         }
@@ -167,7 +167,7 @@ class HubApiController extends Controller
                     "country"=>$data['s_country'],
                     "company"=>$data['s_company'],
                     "billing_interval"=>$data['billing_interval'],
-                    "total_value"=>$data['total_value']+$club['properties']['total_value'],
+                    "total_value"=>$data['total_value'],
                     "subscription_type"=>$data['subscription_type'],
                     "status"=>'PAUSED',
                     "customer_id"=>$data['customer_id'],
@@ -241,8 +241,7 @@ class HubApiController extends Controller
                 'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
             ])->put("https://api.hubapi.com/crm/v4/objects/2-15942972/".$membership['id']."/associations/default/0-3/".$curlResponse->results[0]->id);
 
-            Log::info('message received dipesh');
-            return response('OK',200);
+            return response()->json(['message'=>'ok','status'=>true],200);
         }catch (\Exception $e){
             Log::info('message in catch >>>>>>>>>>'.$e->getMessage());
         }
@@ -253,6 +252,7 @@ class HubApiController extends Controller
     public function sealTopicSubscriptionUpdated(Request $request){
         try{
             $data=collect(json_decode(base64_decode($request->message['data'])))->toArray();
+            Log::info(json_encode($data,JSON_PRETTY_PRINT));
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
             ])->get("https://api.hubapi.com/crm/v3/objects/2-15942972/".$data['id']."?properties=seal_subscription_id,total_value&archived=false&idProperty=seal_subscription_id");
@@ -308,7 +308,6 @@ class HubApiController extends Controller
                     "country"=>$data['s_country'],
                     "company"=>$data['s_company'],
                     "billing_interval"=>$data['billing_interval'],
-                    "total_value"=>$data['total_value']+$club['properties']['total_value'],
                     "subscription_type"=>$data['subscription_type'],
                     "status"=>$data['status'],
                     "customer_id"=>$data['customer_id'],
@@ -326,6 +325,11 @@ class HubApiController extends Controller
                     "paused_on"=> $data['paused_on'],
                 ]
                 ];
+                if($data['status']=='PAUSED' || $data['status']=='CANCELLED' ){
+                   $body["properties"]["total_value"]=$data['total_value'];
+                }else{
+                    $body["properties"]["total_value"]=$data['total_value']+$club['properties']['total_value'];
+                }
                 $response = Http::withHeaders([
                     'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
                 ])->patch('https://api.hubapi.com/crm/v3/objects/2-15942972/'.$club['id'],$body);
@@ -382,9 +386,7 @@ class HubApiController extends Controller
             Http::withHeaders([
                 'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
             ])->put("https://api.hubapi.com/crm/v4/objects/2-15942972/".$membership['id']."/associations/default/0-3/".$curlResponse->results[0]->id);
-
-            Log::info('message received dipesh');
-            return response('OK',200);
+            return response()->json(['message'=>'ok','status'=>true],200);
         }catch (\Exception $e){
             Log::info('updating subscription error'.$e->getMessage());
         }
@@ -449,7 +451,6 @@ class HubApiController extends Controller
                     "country"=>$data['s_country'],
                     "company"=>$data['s_company'],
                     "billing_interval"=>$data['billing_interval'],
-                    "total_value"=>$data['total_value']+$club['properties']['total_value'],
                     "subscription_type"=>$data['subscription_type'],
                     "status"=>$data['status'],
                     "customer_id"=>$data['customer_id'],
@@ -467,6 +468,11 @@ class HubApiController extends Controller
                     "paused_on"=> $data['paused_on'],
                 ]
                 ];
+                if($data['status']=='PAUSED' || $data['status']=='CANCELLED' ){
+                    $body["properties"]["total_value"]=$data['total_value'];
+                }else{
+                    $body["properties"]["total_value"]=$data['total_value']+$club['properties']['total_value'];
+                }
                 $response = Http::withHeaders([
                     'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
                 ])->patch('https://api.hubapi.com/crm/v3/objects/2-15942972/'.$club['id'],$body);
@@ -525,7 +531,7 @@ class HubApiController extends Controller
             ])->put("https://api.hubapi.com/crm/v4/objects/2-15942972/".$membership['id']."/associations/default/0-3/".$curlResponse->results[0]->id);
 
             Log::info('message received dipesh');
-            return response('OK',200);
+            return response()->json(['message'=>'ok','status'=>true],200);
         }catch (\Exception $e){
             Log::info('updating subscription error'.$e->getMessage());
         }
