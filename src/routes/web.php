@@ -17,7 +17,7 @@ Route::get('/', function () {
 dd('app deployed');
 });
 
-Route::get('/process',[\App\Http\Controllers\HubApiController::class,'processApi']);
+//Route::get('/process',[\App\Http\Controllers\HubApiController::class,'processApi']);
 Route::get('/register-webhook',[\App\Http\Controllers\HubApiController::class,'registerWebhooks']);
 Route::any('/subscription-webhook-created',[\App\Http\Controllers\HubApiController::class,'subscriptionCreated']);
 Route::any('/subscription-webhook-updated',[\App\Http\Controllers\HubApiController::class,'subscriptionUpdated']);
