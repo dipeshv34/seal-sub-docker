@@ -418,7 +418,6 @@ class HubApiController extends Controller
                 return response()->json(['message'=>'ok','status'=>true],200);
             }
             catch (\Exception $e){
-                dd($e);
                 Log::info('updating subscription error'.$e->getMessage());
             }
         }

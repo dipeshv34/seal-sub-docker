@@ -17,6 +17,7 @@ class VerifyCsrfToken extends Middleware
         '/subscription-webhook-updated',
         '/subscription-webhook-cancelled',
         '/seal-topic-subscription-created',
-        '/seal-topic-subscription-updated'
+        '/seal-topic-subscription-updated',
+        '/seal-topic-subscription-cancelled'
     ];
 }
