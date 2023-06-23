@@ -259,11 +259,12 @@ class HubApiController extends Controller
                 Log::info('message in catch >>>>>>>>>>' . $e->getMessage());
             }
         }
+        return response()->json(['message'=>'ok','status'=>true],200);
     }
 
     public function sealTopicSubscriptionUpdated(Request $request){
         $data=collect(json_decode(base64_decode($request->message['data'])))->toArray();
-        Log::info(json_encode($data,JSON_PRETTY_PRINT));
+        Log::info(json_encode($data));
         $cache=Cache::store('file')->get('subscription-updated-'.$data['id']);
         if(empty($cache) || $cache!=true){
             try{
@@ -421,6 +422,7 @@ class HubApiController extends Controller
                 Log::info('updating subscription error'.$e->getMessage());
             }
         }
+        return response()->json(['message'=>'ok','status'=>true],200);
 
 
 
@@ -582,5 +584,6 @@ class HubApiController extends Controller
             Log::info('updating subscription error' . $e->getMessage());
         }
         }
+        return response()->json(['message'=>'ok','status'=>true],200);
     }
 }
