@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Google\Cloud\PubSub\PubSubClient;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -110,14 +111,177 @@ class HubApiController extends Controller
     }
 
     public function sealTopicSubscriptionCreated(Request $request){
-        try{
-            $data=collect(json_decode(base64_decode($request->message['data'])))->toArray();
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
-            ])->get("https://api.hubapi.com/crm/v3/objects/2-15942972/".$data['id']."?properties=seal_subscription_id,total_value&archived=false&idProperty=seal_subscription_id");
-            $club=$response->json();
-            if(empty($club)) {
-                $body=["properties"=> [
+        $data=collect(json_decode(base64_decode($request->message['data'])))->toArray();
+        $cache=Cache::store('file')->get('subscription-created-'.$data['id']);
+        if(empty($cache) || $cache!=true) {
+            try {
+                $response = Http::withHeaders([
+                    'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
+                ])->get("https://api.hubapi.com/crm/v3/objects/2-15942972/" . $data['id'] . "?properties=seal_subscription_id,total_value&archived=false&idProperty=seal_subscription_id");
+                $club = $response->json();
+                $status = [
+                    'ACTIVE' => 85863846,
+                    'PAUSED' => 85863847,
+                    'EXPIRED' => 85819956,
+                    'CANCELLED' => 85819957
+
+                ];
+                if (empty($club)) {
+                    $body = ["properties" => [
+                        "seal_subscription_id" => $data['id'],
+                        "order_placed" => $data['order_placed'],
+                        "order_id" => $data['order_id'],
+                        "email" => $data['email'],
+                        "first_name" => $data['first_name'],
+                        "last_name" => $data['last_name'],
+                        "s_address1" => $data['s_address1'],
+                        "s_address2" => $data['s_address2'],
+                        "billing_interval" => $data['billing_interval'],
+                        "city" => $data['s_city'],
+                        "zip" => $data['s_zip'],
+                        "country" => $data['s_country'],
+                        "company" => $data['s_company'],
+                        "total_value" => $data['total_value'],
+                        "subscription_type" => $data['subscription_type'],
+                        "status" => "ACTIVE",
+                        "hs_pipeline" => 40569144,
+                        "hs_pipeline_stage" => $status[$data['status']],
+                        "customer_id" => $data['customer_id'],
+                        "product_id" => $data['items'][0]->product_id,
+                        "title" => $data['items'][0]->title,
+                        "quantity" => $data['items'][0]->quantity,
+                        "total_discount" => $data['items'][0]->total_discount,
+                        "original_price" => $data['items'][0]->original_price,
+                        "original_amount" => $data['items'][0]->original_amount,
+                        "discount_value" => $data['items'][0]->discount_value,
+                        "discount_amount" => $data['items'][0]->discount_amount,
+                        "final_price" => $data['items'][0]->final_price,
+                        "final_amount" => $data['items'][0]->final_amount,
+                        "cancelled_on" => $data['cancelled_on'],
+                        "paused_on" => $data['paused_on'],
+                    ]
+                    ];
+                    $response = Http::withHeaders([
+                        'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
+                    ])->post('https://api.hubapi.com/crm/v3/objects/2-15942972', $body);
+                } else {
+                    $body = ["properties" => [
+                        "order_placed" => $data['order_placed'],
+                        "order_id" => $data['order_id'],
+                        "email" => $data['email'],
+                        "first_name" => $data['first_name'],
+                        "last_name" => $data['last_name'],
+                        "s_address1" => $data['s_address1'],
+                        "s_address2" => $data['s_address2'],
+                        "city" => $data['s_city'],
+                        "zip" => $data['s_zip'],
+                        "country" => $data['s_country'],
+                        "company" => $data['s_company'],
+                        "billing_interval" => $data['billing_interval'],
+                        "total_value" => $data['total_value'],
+                        "subscription_type" => $data['subscription_type'],
+                        "status" => $data['status'],
+                        "hs_pipeline" => 40569144,
+                        "hs_pipeline_stage" => $status[$data['status']],
+                        "customer_id" => $data['customer_id'],
+                        "product_id" => $data['items'][0]->product_id,
+                        "title" => $data['items'][0]->title,
+                        "quantity" => $data['items'][0]->quantity,
+                        "total_discount" => $data['items'][0]->total_discount,
+                        "original_price" => $data['items'][0]->original_price,
+                        "original_amount" => $data['items'][0]->original_amount,
+                        "discount_value" => $data['items'][0]->discount_value,
+                        "discount_amount" => $data['items'][0]->discount_amount,
+                        "final_price" => $data['items'][0]->final_price,
+                        "final_amount" => $data['items'][0]->final_amount,
+                        "cancelled_on" => $data['cancelled_on'],
+                        "paused_on" => $data['paused_on'],
+                    ]
+                    ];
+                    $response = Http::withHeaders([
+                        'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
+                    ])->patch('https://api.hubapi.com/crm/v3/objects/2-15942972/' . $club['id'], $body);
+                }
+                $membership = $response->json();
+//            //get contact
+                $contact = Http::withHeaders([
+                    'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
+                ])->get('https://api.hubapi.com/crm/v3/objects/contacts/' . $data['email'] . '?idProperty=email');
+                $contact = $contact->json();
+
+                Http::withHeaders([
+                    'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
+                ])->put("https://api.hubapi.com/crm/v4/objects/2-15942972/" . $membership['id'] . "/associations/default/0-1/" . $contact['id']);
+
+                //get Deal
+                $curl = curl_init();
+                curl_setopt_array($curl, array(
+                    CURLOPT_URL => 'https://api.hubapi.com/crm/v3/objects/deals/search?hapikey=',
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_ENCODING => '',
+                    CURLOPT_MAXREDIRS => 10,
+                    CURLOPT_TIMEOUT => 0,
+                    CURLOPT_FOLLOWLOCATION => true,
+                    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                    CURLOPT_CUSTOMREQUEST => 'POST',
+                    CURLOPT_POSTFIELDS => '{
+    "filterGroups": [
+        {
+            "filters": [
+               {
+          "operator": "EQ",
+            "propertyName": "shopify_order_id",
+            "value": "' . $data['order_id'] . '"
+          }
+            ]
+        }
+    ],
+    "limit": 10,
+    "properties": [
+        "dealname",
+        "shopify_order_id",
+        "id"
+    ]
+}',
+                    CURLOPT_HTTPHEADER => array(
+                        'Content-Type: application/json',
+                        'Authorization: Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
+                    ),
+                ));
+                $curlResponse = json_decode(curl_exec($curl));
+                curl_close($curl);
+                Http::withHeaders([
+                    'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
+                ])->put("https://api.hubapi.com/crm/v4/objects/2-15942972/" . $membership['id'] . "/associations/default/0-3/" . $curlResponse->results[0]->id);
+                Cache::store('file')->put('subscription-created-' . $data['id'], true, 180);
+                return response()->json(['message' => 'ok', 'status' => true], 200);
+            } catch (\Exception $e) {
+                Log::info('message in catch >>>>>>>>>>' . $e->getMessage());
+            }
+        }
+    }
+
+    public function sealTopicSubscriptionUpdated(Request $request){
+        $data=collect(json_decode(base64_decode($request->message['data'])))->toArray();
+        Log::info(json_encode($data,JSON_PRETTY_PRINT));
+        $cache=Cache::store('file')->get('subscription-updated-'.$data['id']);
+        if(empty($cache) || $cache!=true){
+            try{
+                $status=[
+                    'ACTIVE'=>85863846,
+                    'PAUSED'=>85863847,
+                    'EXPIRED'=>85819956,
+                    'CANCELLED'=>85819957
+
+                ];
+
+                $response = Http::withHeaders([
+                    'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
+                ])->get("https://api.hubapi.com/crm/v3/objects/2-15942972/".$data['id']."?properties=seal_subscription_id,hs_pipeline_stage,total_value&archived=false&idProperty=seal_subscription_id");
+                $club=$response->json();
+
+                if(empty($club)) {
+                    $body=["properties"=> [
                         "seal_subscription_id"=>$data['id'],
                         "order_placed"=>$data['order_placed'],
                         "order_id"=>$data['order_id'],
@@ -133,7 +297,9 @@ class HubApiController extends Controller
                         "company"=>$data['s_company'],
                         "total_value"=>$data['total_value'],
                         "subscription_type"=>$data['subscription_type'],
-                        "status"=>"ACTIVE",
+                        "status"=>$data['status'],
+                        "hs_pipeline"=>40569144,
+                        "hs_pipeline_stage"=>$status[$data['status']],
                         "customer_id"=>$data['customer_id'],
                         "product_id"=>$data['items'][0]->product_id,
                         "title"=>$data['items'][0]->title,
@@ -147,217 +313,78 @@ class HubApiController extends Controller
                         "final_amount"=>$data['items'][0]->final_amount,
                         "cancelled_on"=> $data['cancelled_on'],
                         "paused_on"=> $data['paused_on'],
-                        ]
-                ];
-                $response = Http::withHeaders([
-                    'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
-                ])->post('https://api.hubapi.com/crm/v3/objects/2-15942972',$body);
-            }
-            else{
-                $body=["properties"=> [
-                    "order_placed"=>$data['order_placed'],
-                    "order_id"=>$data['order_id'],
-                    "email"=>$data['email'],
-                    "first_name"=>$data['first_name'],
-                    "last_name"=>$data['last_name'],
-                    "s_address1"=>$data['s_address1'],
-                    "s_address2"=>$data['s_address2'],
-                    "city"=>$data['s_city'],
-                    "zip"=>$data['s_zip'],
-                    "country"=>$data['s_country'],
-                    "company"=>$data['s_company'],
-                    "billing_interval"=>$data['billing_interval'],
-                    "total_value"=>$data['total_value'],
-                    "subscription_type"=>$data['subscription_type'],
-                    "status"=>'PAUSED',
-                    "customer_id"=>$data['customer_id'],
-                    "product_id"=>$data['items'][0]->product_id,
-                    "title"=>$data['items'][0]->title,
-                    "quantity"=>$data['items'][0]->quantity,
-                    "total_discount"=>$data['items'][0]->total_discount,
-                    "original_price"=>$data['items'][0]->original_price,
-                    "original_amount"=>$data['items'][0]->original_amount,
-                    "discount_value"=>$data['items'][0]->discount_value,
-                    "discount_amount"=>$data['items'][0]->discount_amount,
-                    "final_price"=>$data['items'][0]->final_price,
-                    "final_amount"=>$data['items'][0]->final_amount,
-                    "cancelled_on"=> $data['cancelled_on'],
-                    "paused_on"=> $data['paused_on'],
                     ]
-                ];
-                $response = Http::withHeaders([
-                    'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
-                ])->patch('https://api.hubapi.com/crm/v3/objects/2-15942972/'.$club['id'],$body);
-            }
-            $membership=$response->json();
-//            //get contact
-            $contact = Http::withHeaders([
-                'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
-            ])->get('https://api.hubapi.com/crm/v3/objects/contacts/'.$data['email'].'?idProperty=email');
-            $contact=$contact->json();
-
-            Http::withHeaders([
-                'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
-            ])->put("https://api.hubapi.com/crm/v4/objects/2-15942972/".$membership['id']."/associations/default/0-1/".$contact['id']);
-
-            //get Deal
-            $curl = curl_init();
-            curl_setopt_array($curl, array(
-                CURLOPT_URL => 'https://api.hubapi.com/crm/v3/objects/deals/search?hapikey=',
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => '',
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 0,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => 'POST',
-                CURLOPT_POSTFIELDS =>'{
-    "filterGroups": [
-        {
-            "filters": [
-               {
-          "operator": "EQ",
-            "propertyName": "shopify_order_id",
-            "value": "'.$data['order_id'].'"
-          }
-            ]
-        }
-    ],
-    "limit": 10,
-    "properties": [
-        "dealname",
-        "shopify_order_id",
-        "id"
-    ]
-}',
-                CURLOPT_HTTPHEADER => array(
-                    'Content-Type: application/json',
-                    'Authorization: Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
-                ),
-            ));
-            $curlResponse = json_decode(curl_exec($curl));
-            curl_close($curl);
-                        Http::withHeaders([
-                'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
-            ])->put("https://api.hubapi.com/crm/v4/objects/2-15942972/".$membership['id']."/associations/default/0-3/".$curlResponse->results[0]->id);
-
-            return response()->json(['message'=>'ok','status'=>true],200);
-        }catch (\Exception $e){
-            Log::info('message in catch >>>>>>>>>>'.$e->getMessage());
-        }
-
-
-    }
-
-    public function sealTopicSubscriptionUpdated(Request $request){
-        try{
-            $data=collect(json_decode(base64_decode($request->message['data'])))->toArray();
-            Log::info(json_encode($data,JSON_PRETTY_PRINT));
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
-            ])->get("https://api.hubapi.com/crm/v3/objects/2-15942972/".$data['id']."?properties=seal_subscription_id,total_value&archived=false&idProperty=seal_subscription_id");
-            $club=$response->json();
-            if(empty($club)) {
-                $body=["properties"=> [
-                    "seal_subscription_id"=>$data['id'],
-                    "order_placed"=>$data['order_placed'],
-                    "order_id"=>$data['order_id'],
-                    "email"=>$data['email'],
-                    "first_name"=>$data['first_name'],
-                    "last_name"=>$data['last_name'],
-                    "s_address1"=>$data['s_address1'],
-                    "s_address2"=>$data['s_address2'],
-                    "billing_interval"=>$data['billing_interval'],
-                    "city"=>$data['s_city'],
-                    "zip"=>$data['s_zip'],
-                    "country"=>$data['s_country'],
-                    "company"=>$data['s_company'],
-                    "total_value"=>$data['total_value'],
-                    "subscription_type"=>$data['subscription_type'],
-                    "status"=>"ACTIVE",
-                    "customer_id"=>$data['customer_id'],
-                    "product_id"=>$data['items'][0]->product_id,
-                    "title"=>$data['items'][0]->title,
-                    "quantity"=>$data['items'][0]->quantity,
-                    "total_discount"=>$data['items'][0]->total_discount,
-                    "original_price"=>$data['items'][0]->original_price,
-                    "original_amount"=>$data['items'][0]->original_amount,
-                    "discount_value"=>$data['items'][0]->discount_value,
-                    "discount_amount"=>$data['items'][0]->discount_amount,
-                    "final_price"=>$data['items'][0]->final_price,
-                    "final_amount"=>$data['items'][0]->final_amount,
-                    "cancelled_on"=> $data['cancelled_on'],
-                    "paused_on"=> $data['paused_on'],
-                ]
-                ];
-                $response = Http::withHeaders([
-                    'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
-                ])->post('https://api.hubapi.com/crm/v3/objects/2-15942972',$body);
-            }
-            else{
-                $body=["properties"=> [
-                    "order_placed"=>$data['order_placed'],
-                    "order_id"=>$data['order_id'],
-                    "email"=>$data['email'],
-                    "first_name"=>$data['first_name'],
-                    "last_name"=>$data['last_name'],
-                    "s_address1"=>$data['s_address1'],
-                    "s_address2"=>$data['s_address2'],
-                    "city"=>$data['s_city'],
-                    "zip"=>$data['s_zip'],
-                    "country"=>$data['s_country'],
-                    "company"=>$data['s_company'],
-                    "billing_interval"=>$data['billing_interval'],
-                    "subscription_type"=>$data['subscription_type'],
-                    "status"=>$data['status'],
-                    "customer_id"=>$data['customer_id'],
-                    "product_id"=>$data['items'][0]->product_id,
-                    "title"=>$data['items'][0]->title,
-                    "quantity"=>$data['items'][0]->quantity,
-                    "total_discount"=>$data['items'][0]->total_discount,
-                    "original_price"=>$data['items'][0]->original_price,
-                    "original_amount"=>$data['items'][0]->original_amount,
-                    "discount_value"=>$data['items'][0]->discount_value,
-                    "discount_amount"=>$data['items'][0]->discount_amount,
-                    "final_price"=>$data['items'][0]->final_price,
-                    "final_amount"=>$data['items'][0]->final_amount,
-                    "cancelled_on"=> $data['cancelled_on'],
-                    "paused_on"=> $data['paused_on'],
-                ]
-                ];
-                if($data['status']=='PAUSED' || $data['status']=='CANCELLED' ){
-                   $body["properties"]["total_value"]=$data['total_value'];
-                }else{
-                    $body["properties"]["total_value"]=$data['total_value']+$club['properties']['total_value'];
+                    ];
+                    $response = Http::withHeaders([
+                        'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
+                    ])->post('https://api.hubapi.com/crm/v3/objects/2-15942972',$body);
                 }
-                $response = Http::withHeaders([
-                    'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
-                ])->patch('https://api.hubapi.com/crm/v3/objects/2-15942972/'.$club['id'],$body);
-            }
-            $membership=$response->json();
+                else{
+                    $body=["properties"=> [
+                        "order_placed"=>$data['order_placed'],
+                        "order_id"=>$data['order_id'],
+                        "email"=>$data['email'],
+                        "first_name"=>$data['first_name'],
+                        "last_name"=>$data['last_name'],
+                        "s_address1"=>$data['s_address1'],
+                        "s_address2"=>$data['s_address2'],
+                        "city"=>$data['s_city'],
+                        "zip"=>$data['s_zip'],
+                        "country"=>$data['s_country'],
+                        "company"=>$data['s_company'],
+                        "billing_interval"=>$data['billing_interval'],
+                        "subscription_type"=>$data['subscription_type'],
+                        "status"=>$data['status'],
+                        "hs_pipeline"=>40569144,
+                        "hs_pipeline_stage"=>$status[$data['status']],
+                        "customer_id"=>$data['customer_id'],
+                        "product_id"=>$data['items'][0]->product_id,
+                        "title"=>$data['items'][0]->title,
+                        "quantity"=>$data['items'][0]->quantity,
+                        "total_discount"=>$data['items'][0]->total_discount,
+                        "original_price"=>$data['items'][0]->original_price,
+                        "original_amount"=>$data['items'][0]->original_amount,
+                        "discount_value"=>$data['items'][0]->discount_value,
+                        "discount_amount"=>$data['items'][0]->discount_amount,
+                        "final_price"=>$data['items'][0]->final_price,
+                        "final_amount"=>$data['items'][0]->final_amount,
+                        "cancelled_on"=> $data['cancelled_on'],
+                        "paused_on"=> $data['paused_on'],
+                    ]
+                    ];
+                    if($data['status']=='PAUSED' || $data['status']=='CANCELLED' ){
+                        $body["properties"]["total_value"]=$data['total_value'];
+                    }else{
+                        $body["properties"]["total_value"]=$data['total_value']+$club['properties']['total_value'];
+                    }
+                    $response = Http::withHeaders([
+                        'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
+                    ])->patch('https://api.hubapi.com/crm/v3/objects/2-15942972/'.$club['id'],$body);
+                }
+                $membership=$response->json();
 //            //get contact
-            $contact = Http::withHeaders([
-                'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
-            ])->get('https://api.hubapi.com/crm/v3/objects/contacts/'.$data['email'].'?idProperty=email');
-            $contact=$contact->json();
+                $contact = Http::withHeaders([
+                    'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
+                ])->get('https://api.hubapi.com/crm/v3/objects/contacts/'.$data['email'].'?idProperty=email');
+                $contact=$contact->json();
 
-            Http::withHeaders([
-                'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
-            ])->put("https://api.hubapi.com/crm/v4/objects/2-15942972/".$membership['id']."/associations/default/0-1/".$contact['id']);
+                Http::withHeaders([
+                    'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
+                ])->put("https://api.hubapi.com/crm/v4/objects/2-15942972/".$membership['id']."/associations/default/0-1/".$contact['id']);
 
-            //get Deal
+                //get Deal
 
-            $curl = curl_init();
-            curl_setopt_array($curl, array(
-                CURLOPT_URL => 'https://api.hubapi.com/crm/v3/objects/deals/search?hapikey=',
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => '',
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 0,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => 'POST',
-                CURLOPT_POSTFIELDS =>'{
+                $curl = curl_init();
+                curl_setopt_array($curl, array(
+                    CURLOPT_URL => 'https://api.hubapi.com/crm/v3/objects/deals/search?hapikey=',
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_ENCODING => '',
+                    CURLOPT_MAXREDIRS => 10,
+                    CURLOPT_TIMEOUT => 0,
+                    CURLOPT_FOLLOWLOCATION => true,
+                    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                    CURLOPT_CUSTOMREQUEST => 'POST',
+                    CURLOPT_POSTFIELDS =>'{
     "filterGroups": [
         {
             "filters": [
@@ -376,30 +403,45 @@ class HubApiController extends Controller
         "id"
     ]
 }',
-                CURLOPT_HTTPHEADER => array(
-                    'Content-Type: application/json',
-                    'Authorization: Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
-                ),
-            ));
-            $curlResponse = json_decode(curl_exec($curl));
-            curl_close($curl);
-            Http::withHeaders([
-                'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
-            ])->put("https://api.hubapi.com/crm/v4/objects/2-15942972/".$membership['id']."/associations/default/0-3/".$curlResponse->results[0]->id);
-            return response()->json(['message'=>'ok','status'=>true],200);
-        }catch (\Exception $e){
-            Log::info('updating subscription error'.$e->getMessage());
+                    CURLOPT_HTTPHEADER => array(
+                        'Content-Type: application/json',
+                        'Authorization: Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
+                    ),
+                ));
+                $curlResponse = json_decode(curl_exec($curl));
+                curl_close($curl);
+                Http::withHeaders([
+                    'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
+                ])->put("https://api.hubapi.com/crm/v4/objects/2-15942972/".$membership['id']."/associations/default/0-3/".$curlResponse->results[0]->id);
+                Cache::store('file')->put('subscription-updated-'.$data['id'],true,180);
+                return response()->json(['message'=>'ok','status'=>true],200);
+            }
+            catch (\Exception $e){
+                dd($e);
+                Log::info('updating subscription error'.$e->getMessage());
+            }
         }
+
 
 
     }
     public function sealTopicSubscriptionCancelled(Request $request){
+        $data=collect(json_decode(base64_decode($request->message['data'])))->toArray();
+        $cache=Cache::store('file')->get('subscription-cancelled-'.$data['id']);
+        if(empty($cache) || $cache!=true){
         try{
-            $data=collect(json_decode(base64_decode($request->message['data'])))->toArray();
+
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
             ])->get("https://api.hubapi.com/crm/v3/objects/2-15942972/".$data['id']."?properties=seal_subscription_id,total_value&archived=false&idProperty=seal_subscription_id");
             $club=$response->json();
+            $status=[
+                'ACTIVE'=>85863846,
+                'PAUSED'=>85863847,
+                'EXPIRED'=>85819956,
+                'CANCELLED'=>85819957
+
+            ];
             if(empty($club)) {
                 $body=["properties"=> [
                     "seal_subscription_id"=>$data['id'],
@@ -417,7 +459,9 @@ class HubApiController extends Controller
                     "company"=>$data['s_company'],
                     "total_value"=>$data['total_value'],
                     "subscription_type"=>$data['subscription_type'],
-                    "status"=>"ACTIVE",
+                    "status"=>$data['status'],
+                    "hs_pipeline"=>40569144,
+                    "hs_pipeline_stage"=>$status[$data['status']],
                     "customer_id"=>$data['customer_id'],
                     "product_id"=>$data['items'][0]->product_id,
                     "title"=>$data['items'][0]->title,
@@ -453,6 +497,8 @@ class HubApiController extends Controller
                     "billing_interval"=>$data['billing_interval'],
                     "subscription_type"=>$data['subscription_type'],
                     "status"=>$data['status'],
+                    "hs_pipeline"=>40569144,
+                    "hs_pipeline_stage"=>$status[$data['status']],
                     "customer_id"=>$data['customer_id'],
                     "product_id"=>$data['items'][0]->product_id,
                     "title"=>$data['items'][0]->title,
@@ -530,10 +576,11 @@ class HubApiController extends Controller
                 'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
             ])->put("https://api.hubapi.com/crm/v4/objects/2-15942972/".$membership['id']."/associations/default/0-3/".$curlResponse->results[0]->id);
 
-            Log::info('message received dipesh');
+            Cache::store('file')->put('subscription-cancelled-'.$data['id'],true,180);
             return response()->json(['message'=>'ok','status'=>true],200);
-        }catch (\Exception $e){
-            Log::info('updating subscription error'.$e->getMessage());
+        }catch (\Exception $e) {
+            Log::info('updating subscription error' . $e->getMessage());
+        }
         }
     }
 }
