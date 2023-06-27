@@ -145,7 +145,7 @@ class HubApiController extends Controller
                         "subscription_type" => $data['subscription_type'],
                         "status" => "ACTIVE",
                         "hs_pipeline" => 40569144,
-                        "hs_pipeline_stage" => $status[$data['status']],
+                        "hs_pipeline_stage" => $status["ACTIVE"],
                         "customer_id" => $data['customer_id'],
                         "product_id" => $data['items'][0]->product_id,
                         "title" => $data['items'][0]->title,
