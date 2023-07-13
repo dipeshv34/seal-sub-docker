@@ -134,9 +134,9 @@ class HubApiController extends Controller
                 if (empty($club)) {
                     $body = ["properties" => [
                         "seal_subscription_id" => $data['id'],
-                        "order_placed" => $data['order_placed'],
-                        "order_id" => $data['order_id'],
-                        "email" => $data['email'],
+                        "order_placed" => in_array('order_placed',$data) ? $data['order_placed']: null,
+                        "order_id" => in_array('order_id',$data) ? $data['order_id'] : null,
+                        "email" => in_array('email',$data) ? $data['email'] : null,
                         "first_name" => in_array('first_name', $data) ? $data['first_name'] : null,
                         "last_name" => in_array('last_name', $data) ? $data['last_name'] : null,
                         "s_address1" => in_array('s_address1', $data) ? $data['s_address1'] : null,
@@ -171,9 +171,9 @@ class HubApiController extends Controller
                     ])->post('https://api.hubapi.com/crm/v3/objects/2-15942972', $body);
                 } else {
                     $body = ["properties" => [
-                        "order_placed" => $data['order_placed'],
-                        "order_id" => $data['order_id'],
-                        "email" => $data['email'],
+                        "order_placed" => in_array('order_placed',$data) ? $data['order_placed']: null,
+                        "order_id" => in_array('order_id',$data) ? $data['order_id'] : null,
+                        "email" => in_array('email',$data) ? $data['email'] : null,
                         "first_name" => in_array('first_name', $data) ? $data['first_name'] : null,
                         "last_name" => in_array('last_name', $data) ? $data['last_name'] : null,
                         "s_address1" => in_array('s_address1', $data) ? $data['s_address1'] : null,
@@ -290,9 +290,9 @@ class HubApiController extends Controller
                 if (empty($club)) {
                     $body = ["properties" => [
                         "seal_subscription_id" => $data['id'],
-                        "order_placed" => $data['order_placed'],
-                        "order_id" => $data['order_id'],
-                        "email" => $data['email'],
+                        "order_placed" => in_array('order_placed',$data) ? $data['order_placed']: null,
+                        "order_id" => in_array('order_id',$data) ? $data['order_id'] : null,
+                        "email" => in_array('email',$data) ? $data['email'] : null,
                         "first_name" => in_array('first_name', $data) ? $data['first_name'] : null,
                         "last_name" => in_array('last_name', $data) ? $data['last_name'] : null,
                         "s_address1" => in_array('s_address1', $data) ? $data['s_address1'] : null,
@@ -327,9 +327,9 @@ class HubApiController extends Controller
                     ])->post('https://api.hubapi.com/crm/v3/objects/2-15942972', $body);
                 } else {
                     $body = ["properties" => [
-                        "order_placed" => $data['order_placed'],
-                        "order_id" => $data['order_id'],
-                        "email" => $data['email'],
+                        "order_placed" => in_array('order_placed',$data) ? $data['order_placed']: null,
+                        "order_id" => in_array('order_id',$data) ? $data['order_id'] : null,
+                        "email" => in_array('email',$data) ? $data['email'] : null,
                         "first_name" => in_array('first_name', $data) ? $data['first_name'] : null,
                         "last_name" => in_array('last_name', $data) ? $data['last_name'] : null,
                         "s_address1" => in_array('s_address1', $data) ? $data['s_address1'] : null,
@@ -452,9 +452,9 @@ class HubApiController extends Controller
                 if (empty($club)) {
                     $body = ["properties" => [
                         "seal_subscription_id" => $data['id'],
-                        "order_placed" => $data['order_placed'],
-                        "order_id" => $data['order_id'],
-                        "email" => $data['email'],
+                        "order_placed" => in_array('order_placed',$data) ? $data['order_placed']: null,
+                        "order_id" => in_array('order_id',$data) ? $data['order_id'] : null,
+                        "email" => in_array('email',$data) ? $data['email'] : null,
                         "first_name" => in_array('first_name', $data) ? $data['first_name'] : null,
                         "last_name" => in_array('last_name', $data) ? $data['last_name'] : null,
                         "s_address1" => in_array('s_address1', $data) ? $data['s_address1'] : null,
@@ -489,9 +489,9 @@ class HubApiController extends Controller
                     ])->post('https://api.hubapi.com/crm/v3/objects/2-15942972', $body);
                 } else {
                     $body = ["properties" => [
-                        "order_placed" => $data['order_placed'],
-                        "order_id" => $data['order_id'],
-                        "email" => $data['email'],
+                        "order_placed" => in_array('order_placed',$data) ? $data['order_placed']: null,
+                        "order_id" => in_array('order_id',$data) ? $data['order_id'] : null,
+                        "email" => in_array('email',$data) ? $data['email'] : null,
                         "first_name" => in_array('first_name', $data) ? $data['first_name'] : null,
                         "last_name" => in_array('last_name', $data) ? $data['last_name'] : null,
                         "s_address1" => in_array('s_address1', $data) ? $data['s_address1'] : null,
@@ -615,6 +615,14 @@ class HubApiController extends Controller
                 "sub_region" => $metas["subregion"] ?? null,
                 "region" => $metas["region"] ?? null,
                 "blend" => $metas["blend"] ?? null,
+                "soil" => $metas["soil"] ?? null,
+                "farming_method" => $metas["farming_method"] ?? null,
+                "oak" => $metas["oak"] ?? null,
+                "service_temperature" => $metas["service_temperature"] ?? null,
+                "glassware" => $metas["glassware"] ?? null,
+                "drinking_window" => $metas["drinking_window"] ?? null,
+                "decanting" => $metas["decanting"] ?? null,
+                "pairing_text" => $metas["pairing"] ?? null,
                 "alcohol_percent" => $metas["alcohol_percent"] ?? null,
                 "alcohol_rating" => $metas["alcohol_rating"]?? null ,
                 "acid_rating" => $metas["acid_rating"]?? null ,
@@ -671,6 +679,14 @@ class HubApiController extends Controller
                 "sub_region" => $metas["subregion"] ?? null,
                 "region" => $metas["region"] ?? null,
                 "blend" => $metas["blend"] ?? null,
+                "soil" => $metas["soil"] ?? null,
+                "farming_method" => $metas["farming_method"] ?? null,
+                "oak" => $metas["oak"] ?? null,
+                "service_temperature" => $metas["service_temperature"] ?? null,
+                "glassware" => $metas["glassware"] ?? null,
+                "drinking_window" => $metas["drinking_window"] ?? null,
+                "decanting" => $metas["decanting"] ?? null,
+                "pairing" => $metas["pairing"] ?? null,
                 "alcohol_percent" => $metas["alcohol_percent"] ?? null,
                 "alcohol_rating" => $metas["alcohol_rating"]?? null ,
                 "acid_rating" => $metas["acid_rating"]?? null ,
