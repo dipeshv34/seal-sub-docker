@@ -659,8 +659,9 @@ class HubApiController extends Controller
     public function shopifyProductUpdated(Request $request)
     {
         try {
-            $data = collect(json_decode(base64_decode($request->message['data'])))->toArray();
-            Log::info("Product Update - ".json_encode($data));
+//            $data = collect(json_decode(base64_decode($request->message['data'])))->toArray();
+//            Log::info("Product Update - ".json_encode($data));
+            $data=$request->all();
             $product = $this->getProduct($data['id']);
 
             $response = Http::withHeaders([
@@ -687,7 +688,7 @@ class HubApiController extends Controller
                 "glassware" => $metas["glassware"] ?? null,
                 "drinking_window" => $metas["drinking_window"] ?? null,
                 "decanting" => $metas["decanting"] ?? null,
-                "pairing" => $metas["pairing"] ?? null,
+                "pairing_text" => $metas["pairing"] ?? null,
                 "alcohol_percent" => $metas["alcohol_percent"] ?? null,
                 "alcohol_rating" => $metas["alcohol_rating"]?? null ,
                 "acid_rating" => $metas["acid_rating"]?? null ,
@@ -710,7 +711,7 @@ class HubApiController extends Controller
             ];
 
 
-             Http::withHeaders([
+             $res=Http::withHeaders([
                 'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
             ])->patch('https://api.hubapi.com/crm/v3/objects/products/'.$product->id, $body);
             return response()->json(['message' => 'ok', 'status' => true], 200);
@@ -739,7 +740,7 @@ class HubApiController extends Controller
         {
             "operator": "EQ",
           "propertyName": "shopify_product_id",
-          "value": "6963845136438"
+          "value": "'.$id.'"
         }
       ]
     }
