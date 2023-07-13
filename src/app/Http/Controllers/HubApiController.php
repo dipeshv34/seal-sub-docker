@@ -270,7 +270,6 @@ class HubApiController extends Controller
     public function sealTopicSubscriptionUpdated(Request $request)
     {
         $data = collect(json_decode(base64_decode($request->message['data'])))->toArray();
-        Log::info(json_encode($data));
         $cache = Cache::store('file')->get('subscription-updated-' . $data['id']);
         if (empty($cache) || $cache != true) {
             try {
@@ -596,6 +595,7 @@ class HubApiController extends Controller
     {
         try {
             $data = collect(json_decode(base64_decode($request->message['data'])))->toArray();
+            Log::info("Product Create - ".json_encode($data));
             $product = $this->getProduct($data['id']);
 
             $response = Http::withHeaders([
@@ -660,6 +660,7 @@ class HubApiController extends Controller
     {
         try {
             $data = collect(json_decode(base64_decode($request->message['data'])))->toArray();
+            Log::info("Product Update - ".json_encode($data));
             $product = $this->getProduct($data['id']);
 
             $response = Http::withHeaders([
