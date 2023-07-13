@@ -25,5 +25,7 @@ Route::any('/subscription-webhook-cancelled',[\App\Http\Controllers\HubApiContro
 Route::any('/seal-topic-subscription-created',[\App\Http\Controllers\HubApiController::class,'sealTopicSubscriptionCreated']);
 Route::any('/seal-topic-subscription-updated',[\App\Http\Controllers\HubApiController::class,'sealTopicSubscriptionUpdated']);
 Route::any('/seal-topic-subscription-cancelled',[\App\Http\Controllers\HubApiController::class,'sealTopicSubscriptionCancelled']);
+Route::any('/shopify-product-created',[\App\Http\Controllers\HubApiController::class,'shopifyProductCreated']);
+Route::any('/shopify-product-updated',[\App\Http\Controllers\HubApiController::class,'shopifyProductUpdated']);
 
 
