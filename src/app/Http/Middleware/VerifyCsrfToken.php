@@ -19,8 +19,8 @@ class VerifyCsrfToken extends Middleware
         '/seal-topic-subscription-created',
         '/seal-topic-subscription-updated',
         '/seal-topic-subscription-cancelled',
-        'shopify-product-created',
-        'shopify-product-updated'
+        '/shopify-product-created',
+        '/shopify-product-updated'
 
     ];
 }
