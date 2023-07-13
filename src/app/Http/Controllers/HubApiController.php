@@ -659,9 +659,8 @@ class HubApiController extends Controller
     public function shopifyProductUpdated(Request $request)
     {
         try {
-//            $data = collect(json_decode(base64_decode($request->message['data'])))->toArray();
-//            Log::info("Product Update - ".json_encode($data));
-            $data=$request->all();
+            $data = collect(json_decode(base64_decode($request->message['data'])))->toArray();
+            Log::info("Product Update - ".json_encode($data));
             $product = $this->getProduct($data['id']);
 
             $response = Http::withHeaders([
