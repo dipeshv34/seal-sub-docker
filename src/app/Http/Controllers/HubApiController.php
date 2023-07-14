@@ -640,7 +640,7 @@ class HubApiController extends Controller
                 "related_products" => $metas["related_products"]?? null ,
                 "complementary_products" => $metas["complementary_products"]?? null ,
                 "seo_hidden" => $metas["hidden"]?? null ,
-                "sku"=>$data["variants"][0]->sku
+                "hs_sku"=>$data["variants"][0]->sku
             ]
             ];
 
@@ -705,7 +705,7 @@ class HubApiController extends Controller
                 "related_products" => $metas["related_products"]?? null ,
                 "complementary_products" => $metas["complementary_products"]?? null ,
                 "seo_hidden" => $metas["hidden"]?? null ,
-                "sku"=>$data["variants"][0]->sku
+                "hs_sku"=>$data["variants"][0]->sku
             ]
             ];
 
