@@ -712,7 +712,9 @@ class HubApiController extends Controller
              $res=Http::withHeaders([
                 'Authorization' => 'Bearer pat-na1-6f7912dd-9136-42cb-aeaa-2f5ab4f9210d'
             ])->patch('https://api.hubapi.com/crm/v3/objects/products/'.$product->id, $body);
-            return response()->json(['message' => 'ok', 'status' => true], 200);
+            Log::info('Product update happened=='.json_encode($res->json()));
+             return response()->json(['message' => 'ok', 'status' => true], 200);
+
         } catch (\Exception $e) {
             Log::info('creating shopify product error' . $e->getMessage());
             return response()->json(['message' => 'ok', 'status' => true], 200);
